@@ -41,8 +41,6 @@ def removeMedia(feed):
 		elif(c == ']'):
 			betweenbrackets = False;
 		if (not (betweenbrackets and re.match('\s', c))) :	
-			
-				
 			if(c == "@"):
 				insert = False
 			elif(not insert and c == "{"):
@@ -76,7 +74,9 @@ def splitAttrs(tags):
 		print tag
 		if('[' in tag):
 		 	attr = re.findall('\[.*?\]', tag);
-			print attr
+			origintag = tag[0, tag.find("[")];
+			print origintag 
+
 
 #HTML parsing and checking.
 

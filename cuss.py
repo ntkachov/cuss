@@ -23,10 +23,11 @@ class CSSFile:
 		#remove Any comments and anything between brackets.
 		newfeed = re.sub('//.*?\n|/\*.*?\*/', '', feed, 0, re.DOTALL)
 		newfeed = re.sub('\{.*?\}','&', newfeed, 0,  re.DOTALL)
+		newfeed = re.sub('\+', '&', newfeed) #Because css allows + to work the same way as writing a new selector we simply pretend that its new selector.
 		#replace all whitespace with a plus symbol
 		newfeed = re.sub(r'\s+', '+', newfeed, 0, re.MULTILINE)
 		#remove any intances of the plus symbol interacting with the ampersand
-		newfeed = re.sub("\+&\+|\+&|&\+|,\+|\+\+\+", "&", newfeed)
+		newfeed = re.sub("\+&\+|\+&|&\+|,\+|", "&", newfeed)
 		#print newfeed
 		tags = newfeed.split("&")
 		#print tags
@@ -70,20 +71,20 @@ def removeMedia(feed):
 					parencount -=1
 				if(parencount != 0):
 					newfeed += c
-			else:
-				if(insert):
-					newfeed += c
+			elif(insert):
+				newfeed += c
 	return newfeed
 
 def sortTags(tags):
 	newtags = []
 	for tag in tags:
 		tag = re.sub('\*', '', tag);
-		tag = re.sub('(?<=\w)\#(?=\w)', "&#", tag) #Will replace any "h1.class" or "h1#id" with an &. 
-		tag = re.sub('(?<=\w)\.(?=\w)', "&.", tag) #Will replace any "h1.class" or "h1#id" with an &. 
+		tag = re.sub('(?<=\w)\#(?=\w)', "&#", tag) #Will replace any "h1#id" with an &. 
+		tag = re.sub('(?<=\w)\.(?=\w)', "&.", tag) #Will replace any "h1#id" with an &. 
 		if "[" in tag:
 			tag = re.sub(r'\:.*|', '', tag)
-		newtags.append(tag)
+		if(tag != ''):
+			newtags.append(tag)
 	newtags = sorted(set(newtags))
 	return newtags
 

@@ -1,0 +1,10 @@
+#id [1=1] {}
+.class	[2=2][2a=2a] {}
+#nested .nested .nest[3a=3a] {}
+#nested .nested[3=3]:after	{}
+
+#h1, #h2, #h3 { font-family: sans-serif }
+h1.opener + h2 { margin-top: -5mm }  
+*.pastoral { color: green }  /* all elements with class~=pastoral */
+.mydiv .subclass .subsubclass li [4=4] {}
+h1#chapter1 { text-align: center }

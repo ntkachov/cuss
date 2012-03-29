@@ -18,11 +18,14 @@ def parseCSSFile(filename, feed):
 	#remove Any comments and anything between brackets.
 	newfeed = re.sub('//.*?\n|/\*.*?\*/', '', feed, 0, re.DOTALL)
 	newfeed = re.sub('\{.*?\}','&', newfeed, 0,  re.DOTALL)
+	#replace all whitespace with a plus symbol
 	newfeed = re.sub(r'\s+', '+', newfeed, 0, re.MULTILINE)
-	print newfeed
+	#remove any intances of the plus symbol interacting with the ampersand
+	newfeed = re.sub("\+&\+|\+&|&\+", "&", newfeed)
 	tags = newfeed.split("&")
-	#tags = sortTags(tags)	
-	#attributes = splitAttrs(tags);
+	tags = sortTags(tags)	
+	attributes = splitAttrs(tags)
+	print attributes
 
 def checkParens(feed):
 	parenCount = 0
@@ -40,9 +43,9 @@ def removeMedia(feed):
 	betweenbrackets = False
 	for c in feed:
 		if(c == '['):
-			betweenbrackets = True;
+			betweenbrackets = True
 		elif(c == ']'):
-			betweenbrackets = False;
+			betweenbrackets = False
 		if (not (betweenbrackets and re.match('\s', c))) :	
 			if(c == "@"):
 				insert = False
@@ -75,10 +78,11 @@ def splitAttrs(tags):
 	attrs = {}
 	for tag in tags:
 		if('[' in tag):
-		 	attr = re.findall('\[.*?\]', tag);
-			origintag = tag[0: int(tag.find("["))];
+		 	attr = re.findall('\[.*?\]', tag)
+			origintag = tag[0: int(tag.find("["))]
+			if(origintag[-1] == "+"): origintag = origintag[0:-1]
 			if origintag not in attrs:
-				attrs[origintag] = [];
+				attrs[origintag] = []
 			attrs[origintag].append(attr)
 	return attrs
 

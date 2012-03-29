@@ -12,14 +12,17 @@ def parseCSSFile(filename, feed):
 		print ("Unmatched brackets in css file: " + filename)
 		exit()	
 	
-	#get rid of @media 
+	#get rid of @media. Nested brackets make regex harder. 
 	feed = removeMedia(feed)	
+
+	#remove Any comments and anything between brackets.
 	newfeed = re.sub('//.*?\n|/\*.*?\*/', '', feed, 0, re.DOTALL)
-	newfeed = re.sub(r'\{.*?\}','', newfeed, 0,  re.DOTALL)
+	newfeed = re.sub('\{.*?\}','&', newfeed, 0,  re.DOTALL)
+	newfeed = re.sub(r'\s+', '+', newfeed, 0, re.MULTILINE)
 	print newfeed
-	tags = newfeed.split()
-	tags = sortTags(tags)	
-	splitAttrs(tags);
+	tags = newfeed.split("&")
+	#tags = sortTags(tags)	
+	#attributes = splitAttrs(tags);
 
 def checkParens(feed):
 	parenCount = 0
@@ -71,11 +74,13 @@ def sortTags(tags):
 def splitAttrs(tags):
 	attrs = {}
 	for tag in tags:
-		print tag
 		if('[' in tag):
 		 	attr = re.findall('\[.*?\]', tag);
-			origintag = tag[0, tag.find("[")];
-			print origintag 
+			origintag = tag[0: int(tag.find("["))];
+			if origintag not in attrs:
+				attrs[origintag] = [];
+			attrs[origintag].append(attr)
+	return attrs
 
 
 #HTML parsing and checking.

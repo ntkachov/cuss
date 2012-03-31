@@ -6,7 +6,22 @@ import re
 from HTMLParser import HTMLParser
 
 #delimiters
-delimiters = ['+','.','#'];
+delimiters = ['+','.','#','&'];
+consumers = ['+','&'];
+
+def splitmulti(string, delimit, consume):
+	returnList = []
+	liststr = "";
+	for s in string:
+		if(s in delimit):
+			if(liststr != ""):
+				returnList.append(liststr)
+			liststr = "";
+		if(s not in consume):
+			liststr+= s
+			
+	return returnList;
+			
 
 #Class to store everything propperly
 class CSSFile:
@@ -27,7 +42,20 @@ class CSSFile:
 		tags = feed.split("&")
 		#cleans the tags of any psudo selectors
 		tags = self.clean_tags(tags)	
-		print tags;
+		#print tags;
+		self.create_tag_hash(tags)
+	
+	def create_tag_hash(self, tags):
+		self.tagmap = {}
+		for i in range(len(tags)):
+			tag = tags[i]
+			split_tag = splitmulti(tag,delimiters, consumers);
+			for t in split_tag:
+				print t
+				if not t in self.tagmap:
+					self.tagmap[t] = []
+				self.tagmap[t].append(i)
+			
 
 	def checkParens(self, feed):
 		#Count the difference between the number of opening brackets and closing brackets.

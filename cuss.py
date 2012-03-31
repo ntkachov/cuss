@@ -6,21 +6,23 @@ import re
 from HTMLParser import HTMLParser
 
 #delimiters
-delimiters = ['+','.','#','&'];
-consumers = ['+','&'];
+delimiters = ['+','.','#','&','[']
+consumers = ['+','&']
 
+#splits the string but does not consume anything that is not also in the consume list
 def splitmulti(string, delimit, consume):
 	returnList = []
-	liststr = "";
+	liststr = ""
 	for s in string:
 		if(s in delimit):
 			if(liststr != ""):
 				returnList.append(liststr)
-			liststr = "";
+			liststr = ""
 		if(s not in consume):
 			liststr+= s
 			
-	return returnList;
+	returnList.append(liststr)
+	return returnList
 			
 
 #Class to store everything propperly
@@ -37,25 +39,32 @@ class CSSFile:
 		#get rid of @media. Nested brackets make regex harder. 
 		feed = self.remove_media(feed)	
 		#remove comments, braces, and provide delimiters "&" and "+"
-		feed = self.remove_replace(feed);
+		feed = self.remove_replace(feed)
 		#split the file into individual tags (the previous function replaced the css delimiters with our own)
-		tags = feed.split("&")
+		self.tags = feed.split("&")
 		#cleans the tags of any psudo selectors
-		tags = self.clean_tags(tags)	
-		#print tags;
-		self.create_tag_hash(tags)
+		self.clean_tags()	
+		#print tags
+		self.tags_to_set()	
+		print self.create_tag_hash()
+
+	def tags_to_set(self):
+		self.tag_list = []
+		for tag in self.tags:
+			split_tag = splitmulti(tag, delimiters, consumers)
+			self.tag_list.append(split_tag)
+		self.tag_list = filter(None, self.tag_list)
+		return self.tag_list	
 	
-	def create_tag_hash(self, tags):
+	def create_tag_hash(self):
 		self.tagmap = {}
-		for i in range(len(tags)):
-			tag = tags[i]
-			split_tag = splitmulti(tag,delimiters, consumers);
-			for t in split_tag:
-				print t
+		for i in range(len(self.tag_list)):
+			tag = self.tag_list[i]
+			for t in tag:
 				if not t in self.tagmap:
 					self.tagmap[t] = []
 				self.tagmap[t].append(i)
-			
+		return self.tagmap
 
 	def checkParens(self, feed):
 		#Count the difference between the number of opening brackets and closing brackets.
@@ -97,7 +106,7 @@ class CSSFile:
 
 	def remove_replace(self, feed):
 		#remove Any comments and anything between brackets.
-		newfeed = re.sub('//.*?\n|/\*.*?\*/', '', feed, 0, re.DOTALL)
+		newfeed = re.sub('//.*?\n|/\*.*?\*/|\*', '', feed, 0, re.DOTALL)
 		newfeed = re.sub('\{.*?\}','&', newfeed, 0,  re.DOTALL)
 		newfeed = re.sub('\+', '&', newfeed) #Because css allows + to work the same way as writing a new selector we simply pretend that its new selector.		
 		#replace all whitespace with a plus symbol
@@ -107,18 +116,18 @@ class CSSFile:
 		return newfeed
 
 
-	def clean_tags(self, tags):
+	def clean_tags(self):
 		newtags = []
-		for tag in tags:
-			tag = re.sub('\*', '', tag);
+		for tag in self.tags:
+			tag = re.sub('\*', '', tag)
 			tag = re.sub('(?<=\w)\#(?=\w)', "&#", tag) #Will replace any "h1#id" with an &. 
 			tag = re.sub('(?<=\w)\.(?=\w)', "&.", tag) #Will replace any "h1.id" with an &. 
 			tag = re.sub('(?<=\w)\+?(?=\[)', "&", tag) #Will replace any "h1[attr=attrib]" with an &
-			if "[" in tag:
-				tag = re.sub(r'\:.*|', '', tag)
+			tag = re.sub('\:.*', '', tag)
 			if(tag != ''):
 				newtags.append(tag)
 		newtags = sorted(set(newtags))
+		self.tags = newtags
 		return newtags
 	
 #HTML parsing and checking.

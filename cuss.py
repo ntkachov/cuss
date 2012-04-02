@@ -4,6 +4,8 @@ import sys
 import os
 import re
 from HTMLParser import HTMLParser
+from bs4 import BeautifulSoup
+from pyquery import PyQuery
 
 #delimiters
 delimiters = ['+','.','#','&','[']
@@ -46,7 +48,7 @@ class CSSFile:
 		self.clean_tags()	
 		#print tags
 		self.tags_to_set()	
-		print self.create_tag_hash()
+		print self.tags
 
 	def tags_to_set(self):
 		self.tag_list = []
@@ -130,16 +132,27 @@ class CSSFile:
 		self.tags = newtags
 		return newtags
 	
-#HTML parsing and checking.
+#HTML handle and checking
+def html_init(pq):
+	src =  pq.find("link")
+	for c in src:
+		c = pq(c).attr("href")
+		if(c in cssFiles):
+			crosscheck_css(pq, cssFiles[c])	
+		else:
+			print c + " not found"
 
-class cussParser(HTMLParser):
-	def handle_starttag(self, tag, attrs):
-		print tag + " : " + str(attrs) 
 	
-		
 
+def crosscheck_css(pq, css):
+	for tag in css.tags:
+		tag = re.sub('\+', ' ', tag)
+		tag = re.sub('&', '', tag)
+		if(str(pq(tag)) == ""):
+			print tag + " is unused"
 
 #Program initialization
+cssFiles = {}
 def main():
 	path = "./"
 	if(len(sys.argv) > 1):
@@ -150,7 +163,11 @@ def main():
 	for fname in folderfiles:
 		if(".css" in fname):
 			cf = open(os.path.join(path, fname), 'r')
-			CSSFile(fname, cf.read())
+			cssFiles[fname] = CSSFile(fname, cf.read())
+		elif(".html" in fname):
+			cf = open(os.path.join(path, fname),'r')
+			pq = PyQuery(cf.read())
+			html_init(pq)
 			
 
 

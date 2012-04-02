@@ -1,7 +1,7 @@
-#id [1=1] {}
-.class	[2=2][2a=2a] {}
-#nested .nested .nest[3a=3a] {}
-#nested .nested[3=3]:after	{}
+#id [a=a] {}
+.class	[b=b][b=b] {}
+#nested .nested .nest[d=d] {}
+#nested .nested[d=d]:after	{}
 
 h1, h2, h3 { font-family: sans-serif }
 h1.opener + h2 { margin-top: -5mm }  

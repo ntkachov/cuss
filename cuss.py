@@ -133,42 +133,82 @@ class CSSFile:
 		return newtags
 	
 #HTML handle and checking
-def html_init(pq):
+def html_init(fname, pq):
 	src =  pq.find("link")
 	for c in src:
 		c = pq(c).attr("href")
 		if(c in cssFiles):
-			crosscheck_css(pq, cssFiles[c])	
+			crosscheck_css(fname, pq, cssFiles[c])	
 		else:
-			print c + " not found"
+			print "in " +fname + ": " + c + " not found"
 
 	
 
-def crosscheck_css(pq, css):
+def crosscheck_css(fname, pq, css):
 	for tag in css.tags:
 		tag = re.sub('\+', ' ', tag)
 		tag = re.sub('&', '', tag)
 		if(str(pq(tag)) == ""):
-			print tag + " is unused"
+			#print "in " +fname + ": " +tag + " is unused"
+			if( tag not in usedTags):
+				unusedTags[tag] = css.file_name
+		else:
+			if( tag in unusedTags ):
+				del unusedTags[tag]
+			usedTags.append(tag)
+		
+			
 
 #Program initialization
 cssFiles = {}
+htmlFiles = []
+unusedTags = {}
+usedTags = []
+noparse = []
+
+def scan_files(path):
+	folderfiles = os.listdir(path)
+
+	for fname in folderfiles:
+		if(fname[-4:] == ".css"):
+			cf = open(os.path.join(path, fname), 'r')
+			cssFiles[fname] = CSSFile(fname, cf.read())
+		elif(fname[-5:] == ".html"):
+			cf = open(os.path.join(path, fname),'r')
+			pq = PyQuery(cf.read())
+			htmlFiles.append({'name': fname, 'data': pq})
+
+def get_dirs(path, noparse):
+	folderlist = []
+	
+	dirlist = os.listdir(path)
+	for fname in dirlist:
+		dirt = os.path.join(path,fname)
+		if(os.path.isdir(dirt) and dirt[1:] not in noparse and fname[0] != '.'):
+			folderlist += get_dirs(dirt, noparse)
+			folderlist.append(dirt)	
+	return folderlist
+			
+
 def main():
 	path = "./"
 	if(len(sys.argv) > 1):
 		path = sys.argv[1]
+		if(len(sys.argv) > 2):
+			noparse = open(sys.argv[2], 'r').read().split("\n")
+			noparse = filter(None, noparse)
+			print noparse
+				
 
-	folderfiles = os.listdir(path)
+	folderList = get_dirs(path, noparse)
+	folderList.append(path)
+	for f in folderList:
+		scan_files(f)
 
-	for fname in folderfiles:
-		if(".css" in fname):
-			cf = open(os.path.join(path, fname), 'r')
-			cssFiles[fname] = CSSFile(fname, cf.read())
-		elif(".html" in fname):
-			cf = open(os.path.join(path, fname),'r')
-			pq = PyQuery(cf.read())
-			html_init(pq)
-			
+	for html in htmlFiles:
+		html_init(html['name'], html['data'])
+	for tag in unusedTags:
+		print "in " + unusedTags[tag] + ": " + tag + "is unused"	
 
 
 main()

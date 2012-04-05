@@ -6,5 +6,5 @@
 h1, h2, h3 { font-family: sans-serif }
 h1.opener + h2 { margin-top: -5mm }  
 *.pastoral { color: green }  /* all elements with class~=pastoral */
-.mydiv .subclass div.subsubclass li [4=4] {}
+.mydiv .subclass div.subsubclass li[e=e] { background-color: blue; width:100px; height: 20px;}
 h1#chapter1 { text-align: center }

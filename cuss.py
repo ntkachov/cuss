@@ -12,7 +12,7 @@ delimiters = ['+','.','#','&','[']
 consumers = ['+','&']
 
 #splits the string but does not consume anything that is not also in the consume list
-def splitmulti(string, delimit, consume):
+def split_multi(string, delimit, consume):
 	returnList = []
 	liststr = ""
 	for s in string:
@@ -34,7 +34,7 @@ class CSSFile:
 		self.text = feed
 		
 		#check for matched parens. (Unmatched parens will cause errors)
-		if(self.checkParens(feed) != 0):
+		if(self.check_parens(feed) != 0):
 			print ("Unmatched brackets in css file: " + filename)
 			exit()	
 		
@@ -47,36 +47,27 @@ class CSSFile:
 		#cleans the tags of any psudo selectors
 		self.clean_tags()	
 		#print tags
-		self.tags_to_set()	
+		self.create_tags_list()	
 		print self.tags
 
-	def tags_to_set(self):
+	def create_tags_list(self):
 		self.tag_list = []
 		for tag in self.tags:
-			split_tag = splitmulti(tag, delimiters, consumers)
+			split_tag = split_multi(tag, delimiters, consumers)
 			self.tag_list.append(split_tag)
 		self.tag_list = filter(None, self.tag_list)
 		return self.tag_list	
 	
-	def create_tag_hash(self):
-		self.tagmap = {}
-		for i in range(len(self.tag_list)):
-			tag = self.tag_list[i]
-			for t in tag:
-				if not t in self.tagmap:
-					self.tagmap[t] = []
-				self.tagmap[t].append(i)
-		return self.tagmap
 
-	def checkParens(self, feed):
+	def check_parens(self, feed):
 		#Count the difference between the number of opening brackets and closing brackets.
-		parenCount = 0
+		paren_count = 0
 		for c in feed:
 			if(c == "{"):
-				parenCount +=1
+				paren_count +=1
 			elif(c == "}"):
-				parenCount -=1
-		return parenCount
+				paren_count -=1
+		return paren_count
 			
 	def remove_media(self, feed):
 		newfeed = ""
@@ -192,6 +183,7 @@ def get_dirs(path, noparse):
 
 def main():
 	path = "./"
+	noparse = []
 	if(len(sys.argv) > 1):
 		path = sys.argv[1]
 		if(len(sys.argv) > 2):

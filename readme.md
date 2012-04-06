@@ -8,6 +8,22 @@ Cuss is currently done. It parses out all css and html and traverses the directo
 ####Todo:
 Add better directory exclusion options. Maybe a [-noparse] or [-n] option.
 
+##Install:
+Cuss neds python and PyQuery installed in order to run.
+You can obtain PyQuery by running 
+
+	pip install PyQuery
+
+or 
+	
+	easy_install PyQuery
+
+Chances are you will also need to install lxml to your system in order for pyquery to install.
+
+	apt-get install libxml2
+	apt-get install libxsit
+
+
 ##Usage:
 
 	python cuss.py [./relative/path/to/www/ := .] [./relative/path/to/noparse := NONE]
